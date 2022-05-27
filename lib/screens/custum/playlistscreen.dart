@@ -12,16 +12,11 @@ import '../now_playing.dart';
 import 'bottomsheet.dart';
 
 // ignore: must_be_immutable
-class PlaylistScreen extends StatefulWidget {
+class PlaylistScreen extends StatelessWidget {
   String? playlistName;
 
   PlaylistScreen({Key? key, this.playlistName}) : super(key: key);
 
-  @override
-  _PlaylistScreenState createState() => _PlaylistScreenState();
-}
-
-class _PlaylistScreenState extends State<PlaylistScreen> {
   List<Songsdb>? dbSongs = [];
 
   List<Songsdb>? playlistSongs = [];
@@ -32,13 +27,8 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
   final box = Boxes.getInstance();
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    if (widget.playlistName != 'favorites') {
+    if (playlistName != 'favorites') {
       backarrow = IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () {
@@ -54,8 +44,9 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
         elevation: 0,
         backgroundColor: const Color.fromARGB(255, 2, 36, 41),
         title: Text(
-          widget.playlistName!,
-          style: const TextStyle(fontSize: 25),
+          playlistName!,
+          style: const TextStyle(
+              fontSize: 25, fontWeight: FontWeight.bold, color: Colors.teal),
         ),
         leading: backarrow,
         actions: [
@@ -71,7 +62,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                 context: context,
                 builder: (context) {
                   return buildSheet(
-                    playlistName: widget.playlistName!,
+                    playlistName: playlistName!,
                   );
                 },
               );
@@ -97,7 +88,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
               child: ValueListenableBuilder(
                 valueListenable: box.listenable(),
                 builder: (context, boxes, _) {
-                  final playlistSongs = box.get(widget.playlistName)!;
+                  final playlistSongs = box.get(playlistName)!;
                   return playlistSongs.isEmpty
                       ? const SizedBox(
                           child: Center(
@@ -158,7 +149,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                                             Radius.circular(15)),
                                         image: DecorationImage(
                                           image: AssetImage(
-                                              "assets/forallimages.jpg"),
+                                              "assets/istockphoto-1175435360-612x612.jpg"),
                                           fit: BoxFit.cover,
                                         ),
                                       ),
@@ -183,13 +174,12 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                                 ),
                                 trailing: IconButton(
                                   onPressed: () {
-                                    setState(
-                                      () {
-                                        playlistSongs.removeAt(index);
-                                        box.put(
-                                            widget.playlistName, playlistSongs);
-                                      },
-                                    );
+                                    //   setState(
+                                    //    () {
+                                    playlistSongs.removeAt(index);
+                                    box.put(playlistName, playlistSongs);
+                                    //   },
+                                    //  );
                                     snackbarcustom(text: 'DELETED');
                                   },
                                   icon: const Icon(Icons.delete,

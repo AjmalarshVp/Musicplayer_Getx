@@ -1,25 +1,29 @@
 // ignore_for_file: camel_case_types
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+
 import 'package:hive_flutter/adapters.dart';
 import 'package:music_player/screens/custum/snackbar.dart';
 
+import '../Controller/Getx_Controller.dart';
 import '../db/box.dart';
 import '../db/songsmodel.dart';
 import 'custum/editplaylist.dart';
 import 'custum/playlistscreen.dart';
 
 // ignore: must_be_immutable
-class play_List extends StatefulWidget {
+class play_List extends StatelessWidget {
   String playListname = '';
 
   play_List({Key? key, required this.playListname}) : super(key: key);
 
   @override
-  State<play_List> createState() => _play_ListState();
-}
 
-class _play_ListState extends State<play_List> {
+
+
+  final _controller = Get.put(Controller());
   List playlists = [];
   String? playlistName = '';
   final box = Boxes.getInstance();
@@ -47,59 +51,71 @@ class _play_ListState extends State<play_List> {
                     TextButton.icon(
                       onPressed: () {
                         showDialog(
+                          
                           context: context,
                           builder: (context) => AlertDialog(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(20),
+                            ),
                             backgroundColor:
-                                const Color.fromARGB(146, 241, 243, 247),
+                            Colors.white,
+                              //  const Color.fromARGB(146, 241, 243, 247),
                             title: const Text(
                               "Add new Playlist",
                               textAlign: TextAlign.center,
                               style:
-                                  TextStyle(fontSize: 16, color: Colors.white),
+                                  TextStyle(fontSize: 16, color: Colors.teal),
                             ),
                             content: TextField(
-                              style: const TextStyle(color: Colors.white),
+                              style: const TextStyle(color: Color.fromARGB(255, 3, 84, 65)),
                               onChanged: (value) {
                                 playlistName = value.trim();
                               },
                               autofocus: true,
                               cursorRadius: const Radius.circular(50),
-                              cursorColor: Colors.grey,
+                              cursorColor: Colors.black,
                             ),
                             actions: [
-                              TextButton(
-                                onPressed: () {
-                                  List<Songsdb> librayry = [];
-                                  List? excistingName = [];
-                                  if (playlists.isNotEmpty) {
-                                    excistingName = playlists
-                                        .where((element) =>
-                                            element == playlistName)
-                                        .toList();
-                                  }
+                              GetBuilder<Controller>(
+                                
+                                builder: (_) {
+                                  return TextButton(
+                                    onPressed: () {
+                                      List<Songsdb> librayry = [];
+                                      List? excistingName = [];
+                                      if (playlists.isNotEmpty) {
+                                        excistingName = playlists
+                                            .where((element) =>
+                                                element == playlistName)
+                                            .toList();
+                                      }
 
-                                  if (playlistName != '' &&
-                                      excistingName.isEmpty) {
-                                    box.put(playlistName, librayry);
-                                    Navigator.of(context).pop();
-                                    setState(() {
-                                      playlists = box.keys.toList();
-                                    });
-                                    snackbarcustom(text: 'CREATED NEW LIST');
-                                  } if (playlistName =='') {
-                                    snackbarcustom(text: 'please type valid input');
-                                    
-                                  } 
-                                  else {
-                                  //  snackbarcustom(text: 'alredy exist');
-                                  }
+                                      if (playlistName != '' &&
+                                          excistingName.isEmpty) {
+                                        box.put(playlistName, librayry);
+                                        Navigator.of(context).pop();
+                                       // setState(() {
+                                          playlists = box.keys.toList();
+                                      //  });
+                                        snackbarcustom(
+                                            text: 'CREATED NEW LIST');
+                                      }
+                                      if (playlistName == '') {
+                                        snackbarcustom(
+                                            text: 'please type valid input');
+                                      } else {
+                                         // snackbarcustom(text: 'alredy exist');
+                                      }
+                                    },
+                                    child: const Text(
+                                      "ADD",
+                                      style: TextStyle(
+                                        color:Colors.teal
+                                           // Color.fromARGB(255, 233, 225, 225),
+                                      ),
+                                    ),
+                                  );
                                 },
-                                child: const Text(
-                                  "ADD",
-                                  style: TextStyle(
-                                    color: Color.fromARGB(255, 233, 225, 225),
-                                  ),
-                                ),
                               )
                             ],
                           ),
@@ -142,6 +158,7 @@ class _play_ListState extends State<play_List> {
                                       playlists[index].toString(),
                                       style: const TextStyle(
                                         color:
+                                        //Colors.white,
                                             Color.fromARGB(255, 27, 190, 128),
                                         fontWeight: FontWeight.bold,
                                       ),
@@ -154,18 +171,18 @@ class _play_ListState extends State<play_List> {
                                             Radius.circular(15)),
                                         image: DecorationImage(
                                           image: AssetImage(
-                                              "assets/musicfolderimage.jpg"),
+                                              "assets/unnamed.png"),
                                           fit: BoxFit.cover,
                                         ),
                                       ),
-                                      
                                     ),
-                                    
+
                                     // leading: const Icon(
                                     //   Icons.queue_sharp,
                                     //   color: Color.fromARGB(255, 219, 231, 229),
                                     // ),
-                                    trailing: popupMenuBar(index),iconColor:Colors.white ,
+                                    trailing: popupMenuBar(index ,context),
+                                    iconColor: Colors.white,
                                     onTap: () {
                                       Navigator.push(
                                         context,
@@ -176,9 +193,7 @@ class _play_ListState extends State<play_List> {
                                         ),
                                       );
                                     },
-                                    
                                   )
-                                  
                                 : Container(),
                           );
                         },
@@ -187,7 +202,6 @@ class _play_ListState extends State<play_List> {
                   },
                 ),
               ),
-              
             ],
           ),
         ),
@@ -195,8 +209,9 @@ class _play_ListState extends State<play_List> {
     );
   }
 
-  popupMenuBar(int index) {
+  popupMenuBar(int index,BuildContext context ) {
     return PopupMenuButton(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
       color: const Color.fromARGB(255, 27, 21, 21),
       itemBuilder: (context) => [
         const PopupMenuItem(
@@ -211,25 +226,29 @@ class _play_ListState extends State<play_List> {
           child: Text("Rename Playlist", style: TextStyle(color: Colors.white)),
         ),
       ],
-      onSelected: (value) {
+      onSelected: (value ) {
         if (value == "0") {
-          showDialog(
-              context: context,
-              builder: (context) => AlertDialog(
-                    backgroundColor: const Color.fromARGB(109, 49, 182, 182),
-                    title: Text(
+          Get.defaultDialog(
+            
+                    backgroundColor: Colors.white,
+                    title: 
                       playlistName.toString(),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(fontSize: 16, color:Colors.red),
-                    ),
+                   
+                    
                     content: const Text('Delete ?'),
                     actions: [
+                       TextButton(
+                        onPressed: () {
+                        Get.back();
+                        },
+                        child: const Text('No'),
+                      ),
                       TextButton(
                         onPressed: () {
                           box.delete(
                             playlists[index],
                           );
-                          Navigator.pop(context);
+                          Get.back();
                           snackbarcustom(text: 'DELETED');
                         },
                         child: const Text(
@@ -237,18 +256,11 @@ class _play_ListState extends State<play_List> {
                           style: TextStyle(color: Colors.red),
                         ),
                       ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: const Text('No'),
-                      ),
+                     
                     ],
-                  ));
+                
+                  );
 
-          setState(() {
-            playlists = box.keys.toList();
-          });
         }
         if (value == "1") {
           showDialog(

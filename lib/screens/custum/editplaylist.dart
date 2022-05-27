@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../db/box.dart';
 
-
-
 // ignore: must_be_immutable
 class EditPlaylist extends StatelessWidget {
   EditPlaylist({Key? key, required this.playlistName}) : super(key: key);
@@ -14,11 +12,8 @@ class EditPlaylist extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      shape: Border.all(
-        //width: 1,
-        color: const Color.fromARGB(255, 196, 49, 49),
-      ),
-      backgroundColor: const Color.fromARGB(255, 209, 108, 108),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      backgroundColor: Color.fromARGB(255, 94, 138, 129),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

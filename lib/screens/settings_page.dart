@@ -1,49 +1,52 @@
-
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:music_player/Controller/Getx_Controller.dart';
 import 'package:music_player/screens/custum/snackbar.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
-bool notification = true;
-
-// ignore: camel_case_types
-class settings extends StatefulWidget {
-  const settings({Key? key}) : super(key: key);
-
-  @override
-  State<settings> createState() => _settingsState();
-}
+//bool notification = true;
 
 // ignore: camel_case_types
-class _settingsState extends State<settings> {
-  bool _toggled = false;
+class settings extends StatelessWidget {
+   const settings({Key? key}) : super(key: key);
 
-  @override
-  void initState() {
-    super.initState();
-    getSwitchValues();
-  }
+  // ignore: camel_case_types
 
-  getSwitchValues() async {
-    _toggled = await getSwitchState();
-    setState(() {});
-  }
+ 
+ // bool _toggled = false;
 
-  Future<bool> saveSwitchState(bool value) async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    prefs.setBool("notification", value);
-    return prefs.setBool("notification", value);
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   getSwitchValues();
+  // }
+  
 
-  Future<bool> getSwitchState() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool? _toggled = prefs.getBool("notification");
 
-    return _toggled ?? true;
-  }
+//   getSwitchValues() async {
+//     _toggled = await getSwitchState();
+//  //   setState(() {});
+//   }
+
+  // Future<bool> saveSwitchState(bool value) async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   prefs.setBool("notification", value);
+  //   return prefs.setBool("notification", value);
+  // }
+
+  // Future<bool> getSwitchState() async {
+  //   SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   bool? _toggled = prefs.getBool("notification");
+
+  //   return _toggled ?? true;
+  // }
 
   @override
   Widget build(BuildContext context) {
+ final _controller = Get.put(Controller());
+ _controller.getSwitchValues();
+
+    
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 2, 36, 41),
       appBar: AppBar(
@@ -56,7 +59,6 @@ class _settingsState extends State<settings> {
       body: Container(
         height: MediaQuery.of(context).size.height,
         width: MediaQuery.of(context).size.width,
-       
         child: Padding(
           padding: const EdgeInsets.all(35),
           child: ClipRRect(
@@ -66,7 +68,7 @@ class _settingsState extends State<settings> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  height: MediaQuery.of(context).size.height * 0.7,
+                  height: MediaQuery.of(context).size.height * 0.5,
                   width: MediaQuery.of(context).size.width,
                   decoration: const BoxDecoration(
                       gradient: LinearGradient(
@@ -75,14 +77,14 @@ class _settingsState extends State<settings> {
                     stops: [
                       0.1,
                       0.4,
-                      0.6,
+                      0.9,
                       0.9,
                     ],
                     colors: [
-                      Color.fromARGB(255, 145, 177, 174),
+                      Color.fromARGB(255, 2, 36, 41),
                       Color.fromARGB(255, 3, 37, 43),
                       Color.fromARGB(255, 11, 49, 49),
-                      Color.fromARGB(255, 5, 77, 69),
+                     Color.fromARGB(255, 2, 36, 41),
                     ],
                   )),
                   child: Padding(
@@ -122,18 +124,24 @@ class _settingsState extends State<settings> {
                                   style: TextStyle(
                                       fontSize: 19, color: Colors.white),
                                 )),
-                            Switch.adaptive(
-                                inactiveThumbColor:
-                                    const Color.fromARGB(255, 196, 214, 210),
-                                activeColor: const Color.fromARGB(255, 12, 86, 51),
-                                value: _toggled,
-                                onChanged: (bool value) {
-                                  setState(() {
-                                    _toggled = value;
-                                   saveSwitchState(value);
-                                  });
-                                  snackbarcustom(text: 'RESTART YOUR APP');
-                                })
+                            GetBuilder<Controller>(
+                              builder: (Controller) {
+                                return Switch.adaptive(
+                                    inactiveThumbColor: const Color.fromARGB(
+                                        255, 196, 214, 210),
+                                    activeColor:
+                                        const Color.fromARGB(255, 12, 86, 51),
+                                    value:_controller. toggled,
+                                    onChanged: (bool value) {
+                                     
+                                      _controller. toggled = value;
+                                      _controller.update();
+                                    _controller.  saveSwitchState(value);
+                                   
+                                      snackbarcustom(text: 'RESTART YOUR APP');
+                                    });
+                              },
+                            )
                           ],
                         ),
                         const SizedBox(
@@ -141,7 +149,7 @@ class _settingsState extends State<settings> {
                         ),
                         TextButton.icon(
                             onPressed: () {
-                             _shareApp();
+                              _shareApp(context);
                             },
                             icon: const Icon(
                               Icons.share,
@@ -215,7 +223,8 @@ class _settingsState extends State<settings> {
       },
     );
   }
-   void _shareApp() async {
+
+  void _shareApp(BuildContext context) async {
     final box = context.findRenderObject() as RenderBox?;
     const String uri =
         'https://play.google.com/store/apps/details?id=in.brototype.muzeeco';

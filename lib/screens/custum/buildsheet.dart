@@ -9,15 +9,11 @@ import '../../db/songsmodel.dart';
 
 
 // ignore: must_be_immutable
-class BuildSheet extends StatefulWidget {
+class BuildSheet extends StatelessWidget {
   BuildSheet({Key? key, this.song}) : super(key: key);
   Audio? song;
 
-  @override
-  State<BuildSheet> createState() => _BuildSheetState();
-}
-
-class _BuildSheetState extends State<BuildSheet> {
+  
   List playlists = [];
 
   String? playlistName = '';
@@ -39,6 +35,7 @@ class _BuildSheetState extends State<BuildSheet> {
               onTap: () => showDialog(
                 context: context,
                 builder: (context) => AlertDialog(
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                   backgroundColor: Color.fromARGB(133, 14, 74, 81),
                   title: const Text(
                     "Add new Playlist",
@@ -70,9 +67,9 @@ class _BuildSheetState extends State<BuildSheet> {
                           if (playlistName != '' && excistingName.isEmpty) {
                             box.put(playlistName, librayry);
                             Navigator.of(context).pop();
-                            setState(() {
+                           // setState(() {
                               playlists = box.keys.toList();
-                            });
+                          //  });
                             snackbarcustom(text: 'CREATED NEW LIST');
                           } else {
                             snackbarcustom(text: 'file exist');
@@ -101,6 +98,7 @@ class _BuildSheetState extends State<BuildSheet> {
                   size: 28,
                 )),
               ),
+              
               title: const Text(
                 "Create Playlist",
                 style: TextStyle(
@@ -120,14 +118,14 @@ class _BuildSheetState extends State<BuildSheet> {
                         existingSongs = playlistSongs!
                             .where((element) =>
                                 element.id.toString() ==
-                                widget.song!.metas.id.toString())
+                                song!.metas.id.toString())
                             .toList();
 
                         if (existingSongs.isEmpty) {
                           final songs = box.get("musics") as List<Songsdb>;
                           final temp = songs.firstWhere((element) =>
                               element.id.toString() ==
-                              widget.song!.metas.id.toString());
+                              song!.metas.id.toString());
                           playlistSongs?.add(temp);
 
                           await box.put(e, playlistSongs!);
@@ -146,7 +144,7 @@ class _BuildSheetState extends State<BuildSheet> {
                         width: 50,
                         decoration: const BoxDecoration(
                           image: DecorationImage(
-                              image: AssetImage("assets/musicfolderimage.jpg"),
+                              image: AssetImage("assets/unnamed.png"),
                               fit: BoxFit.cover),
                           borderRadius: BorderRadius.all(Radius.circular(17)),
                         ),

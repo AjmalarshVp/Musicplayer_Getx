@@ -2,15 +2,20 @@ import 'dart:async';
 import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:marquee/marquee.dart';
+
+import 'package:music_player/Controller/Getx_Controller.dart';
 import 'package:music_player/screens/custum/snackbar.dart';
 
 import 'package:on_audio_query/on_audio_query.dart';
 
 import '../db/box.dart';
 import '../db/songsmodel.dart';
+import 'custum/buildsheet.dart';
 
 // ignore: must_be_immutable
-class NowPlaying extends StatefulWidget {
+class NowPlaying extends StatelessWidget {
   List<Audio> allsong = [];
 
   int index;
@@ -20,11 +25,6 @@ class NowPlaying extends StatefulWidget {
     required this.index,
   }) : super(key: key);
 
-  @override
-  State<NowPlaying> createState() => _NowPlayingState();
-}
-
-class _NowPlayingState extends State<NowPlaying> {
   final AssetsAudioPlayer assetsAudioPlayer = AssetsAudioPlayer.withId("0");
   Songsdb? music;
   final List<StreamSubscription> subscription = [];
@@ -33,24 +33,17 @@ class _NowPlayingState extends State<NowPlaying> {
   List<dynamic>? likedSongs = [];
   List<dynamic>? favorites = [];
 
-  @override
-  void initState() {
-    super.initState();
-    dbSongs = box.get("musics") as List<Songsdb>;
-  }
-
   Audio find(List<Audio> source, String fromPath) {
     return source.firstWhere((element) => element.path == fromPath);
   }
 
-  bool isPlaying = false;
-  bool isLooping = false;
-  bool isShuffle = false;
-
   @override
   Widget build(BuildContext context) {
+    final _controller = Get.put(Controller());
+    dbSongs = box.get("musics") as List<Songsdb>;
     //double myHeight = MediaQuery.of(context).size.height;
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       appBar: AppBar(
         elevation: 1,
         leading: IconButton(
@@ -59,7 +52,7 @@ class _NowPlayingState extends State<NowPlaying> {
           },
           icon: const Icon(Icons.arrow_drop_down),
         ),
-        backgroundColor:const Color.fromARGB(255, 5, 54, 50),
+        backgroundColor: const Color.fromARGB(255, 5, 54, 50),
         centerTitle: true,
         title: const Text(
           'Now Playing',
@@ -69,31 +62,31 @@ class _NowPlayingState extends State<NowPlaying> {
             fontSize: 15,
           ),
         ),
+        actions: [],
       ),
       body: Container(
         height: double.infinity,
         width: double.infinity,
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomLeft,
-                stops: [
-                  0.1,
-                  0.4,
-                  0.6,
-                  0.9,
-                ],
-                colors: [
-                  Color.fromARGB(255, 5, 54, 50),
-                  Color.fromARGB(255, 2, 30, 34),
-                  Color.fromARGB(255, 2, 87, 87),
-                  Color.fromARGB(255, 5, 77, 69),
-                ],
-              )
-        ),
+            gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomLeft,
+          stops: [
+            0.1,
+            0.4,
+            0.6,
+            0.9,
+          ],
+          colors: [
+            Color.fromARGB(255, 5, 54, 50),
+            Color.fromARGB(255, 2, 30, 34),
+            Color.fromARGB(255, 2, 87, 87),
+            Color.fromARGB(255, 5, 77, 69),
+          ],
+        )),
         child: assetsAudioPlayer.builderCurrent(
           builder: (context, Playing? playing) {
-            final myaudio = find(widget.allsong, playing!.audio.assetAudioPath);
+            final myaudio = find(allsong, playing!.audio.assetAudioPath);
             final currentSong = dbSongs.firstWhere((element) =>
                 element.id.toString() == myaudio.metas.id.toString());
             likedSongs = box.get("favorites");
@@ -117,7 +110,7 @@ class _NowPlayingState extends State<NowPlaying> {
                         artworkFit: BoxFit.fill,
                         artworkClipBehavior: Clip.antiAliasWithSaveLayer,
                         nullArtworkWidget: Image.asset(
-                          "assets/forallimages.jpg",
+                          "assets/istockphoto-1175435360-612x612.jpg",
                           height: 250,
                           width: 280,
                           fit: BoxFit.cover,
@@ -135,12 +128,23 @@ class _NowPlayingState extends State<NowPlaying> {
                     SizedBox(
                       height: MediaQuery.of(context).size.height * 0.03,
                     ),
-                    Text(
-                      "${myaudio.metas.title}",
-                      style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 25.0,
-                          fontWeight: FontWeight.bold),
+                    Column(
+                      children: [
+                        SizedBox(
+                          height: 40,
+                          child: Marquee(
+                            text:
+                              "${myaudio.metas.title}",
+                              
+                              style: const TextStyle(
+                                  overflow: TextOverflow.ellipsis,
+                                  color: Colors.white,
+                                  fontSize: 25.0,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                        ),
+                        
+                      ],
                     ),
                     SizedBox(
                       height: MediaQuery.of(context).size.height * 0.05,
@@ -152,78 +156,117 @@ class _NowPlayingState extends State<NowPlaying> {
                     SizedBox(
                       height: MediaQuery.of(context).size.height * 0.03,
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        !isShuffle
-                            ? IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    isShuffle = true;
-                                    assetsAudioPlayer.toggleShuffle();
-                                  });
-                                },
-                                icon: const Icon(Icons.shuffle),
-                              )
-                            : IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    isShuffle = false;
-                                    assetsAudioPlayer
-                                        .setLoopMode(LoopMode.playlist);
-                                  });
-                                },
-                                icon: const Icon(Icons.loop_sharp),
-                              ),
-                        likedSongs!
-                                .where((element) =>
-                                    element.id.toString() ==
-                                    currentSong.id.toString())
-                                .isEmpty
-                            ? IconButton(
-                                onPressed: () async {
-                                  likedSongs?.add(currentSong);
-                                  box.put("favorites", likedSongs!);
-                                  likedSongs = box.get("favorites");
-                                  setState(() {});
-                                  snackbarcustom(text: 'ADDED TO FAVORITE');
-                                },
-                                icon: const Icon(Icons.favorite_border),
-                              )
-                            : IconButton(
-                                onPressed: () async {
-                                  setState(() {
-                                    likedSongs?.removeWhere((elemet) =>
-                                        elemet.id.toString() ==
-                                        currentSong.id.toString());
-                                    box.put("favorites", likedSongs!);
-                                  });
-                                   snackbarcustom(text: 'REMOVED to FROM FAVORITE');
-                                },
-                                icon: const Icon(Icons.favorite),
-                              ),
-                        !isLooping
-                            ? IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    isLooping = true;
-                                    assetsAudioPlayer
-                                        .setLoopMode(LoopMode.single);
-                                  });
-                                },
-                                icon: const Icon(Icons.repeat),
-                              )
-                            : IconButton(
-                                onPressed: () {
-                                  setState(() {
-                                    isLooping = false;
-                                    assetsAudioPlayer
-                                        .setLoopMode(LoopMode.playlist);
-                                  });
-                                },
-                                icon: const Icon(Icons.repeat_one),
-                              ),
-                      ],
+                    GetBuilder<Controller>(
+                      builder: (_) {
+                        return Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            IconButton(
+                              icon: Icon(Icons.my_library_music_outlined),
+                              onPressed: () {
+                                //Navigator.of(context).pop();
+                                showModalBottomSheet(
+                                  backgroundColor:
+                                      Color.fromARGB(159, 6, 63, 63)
+                                          .withOpacity(1.0),
+                                  // backgroundColor:Colors.white,
+                                  //  const Color.fromARGB(96, 11, 61, 62),
+                                  shape: const RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(30),
+                                    ),
+                                  ),
+                                  context: context,
+                                  builder: (context) => BuildSheet(
+                                    song: allsong[index],
+                                  ),
+                                );
+                              },
+                            ),
+                            !_controller.isShuffle
+                                ? IconButton(
+                                    onPressed: () {
+                                      //  setState(() {
+                                      _controller.isShuffle = true;
+                                      assetsAudioPlayer.toggleShuffle();
+                                      _controller.update();
+                                      //   });
+                                    },
+                                    icon: const Icon(Icons.shuffle),
+                                  )
+                                : IconButton(
+                                    onPressed: () {
+                                      //  setState(() {
+                                      _controller.isShuffle = false;
+                                      assetsAudioPlayer
+                                          .setLoopMode(LoopMode.playlist);
+                                      _controller.update();
+                                      //    });
+                                    },
+                                    icon: const Icon(Icons.loop_sharp),
+                                  ),
+                            _controller.likedSongs!
+                                    .where((element) =>
+                                        element.id.toString() ==
+                                        currentSong.id.toString())
+                                    .isEmpty
+                                ? IconButton(
+                                    onPressed: () {
+                                      print(
+                                          "Nowplaying....................$currentSong");
+                                      _controller.Addtofavorite(currentSong);
+                                      // likedSongs?.add(currentSong);
+                                      // box.put("favorites", likedSongs!);
+                                      // likedSongs = box.get("favorites");
+                                      _controller.update();
+                                      // setState(() {});
+                                      snackbarcustom(text: 'ADDED TO FAVORITE');
+                                      _controller.update();
+                                    },
+                                    icon: const Icon(Icons.favorite_border),
+                                  )
+                                : IconButton(
+                                    onPressed: () async {
+                                      _controller
+                                          .removeFromfavourite(currentSong);
+                                      // setState(() {
+                                      //   likedSongs?.removeWhere((elemet) =>
+                                      //       elemet.id.toString() ==
+                                      //      currentSong.id.toString());
+                                      //  box.put("favorites", likedSongs!);
+                                      _controller.update();
+                                      //   });
+                                      snackbarcustom(
+                                          text: 'REMOVED to FROM FAVORITE');
+                                    },
+                                    icon: const Icon(Icons.favorite),
+                                  ),
+                            !_controller.isLooping
+                                ? IconButton(
+                                    onPressed: () {
+                                      //   setState(() {
+                                      _controller.isLooping = true;
+                                      assetsAudioPlayer
+                                          .setLoopMode(LoopMode.single);
+                                      _controller.update();
+                                      //  });
+                                    },
+                                    icon: const Icon(Icons.repeat),
+                                  )
+                                : IconButton(
+                                    onPressed: () {
+                                      //   setState(() {
+                                      _controller.isLooping = false;
+                                      assetsAudioPlayer
+                                          .setLoopMode(LoopMode.playlist);
+                                      _controller.update();
+                                      //  });
+                                    },
+                                    icon: const Icon(Icons.repeat_one),
+                                  ),
+                          ],
+                        );
+                      },
                     ),
                     SizedBox(
                       height: MediaQuery.of(context).size.height * 0.03,
@@ -266,6 +309,9 @@ class _NowPlayingState extends State<NowPlaying> {
                             );
                           },
                         ),
+
+                        //  dbSongs ==dbSongs[dbSongs.length-1]
+
                         Padding(
                           padding: const EdgeInsets.only(right: 10.0),
                           child: IconButton(

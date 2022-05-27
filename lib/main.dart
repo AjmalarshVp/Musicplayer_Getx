@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/adapters.dart';
 
+
 import 'package:music_player/screens/splashscreen.dart';
 
 import 'db/box.dart';
@@ -14,7 +15,7 @@ Future main() async {
   await Hive.openBox<List>(boxname);
 
   final box = Boxes.getInstance();
-
+  //newly editing for marquee 
   //Add for playlist working
   List<dynamic> libraryKeys = box.keys.toList();
   if (!libraryKeys.contains("favorites")) {
@@ -40,7 +41,7 @@ class MyApp extends StatelessWidget {
 
           // ),
           ),
-      home: const SplashScreen(),
+      home:const  SplashScreen(),
     );
   }
 }

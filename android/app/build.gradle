@@ -53,7 +53,7 @@ android {
         applicationId "in.music_player"
         minSdkVersion 21
         targetSdkVersion flutter.targetSdkVersion
-        versionCode 4
+        versionCode 7
         versionName flutterVersionName
         multiDexEnabled true
     } 
